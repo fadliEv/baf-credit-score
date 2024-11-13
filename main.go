@@ -1,9 +1,19 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+)
 
 func main() {
-	fmt.Println("Hello Dunia")
+	dsn := "host=localhost user=postgres password=123 dbname=baf_credit_score port=5433 sslmode=disable"
+	_,err := gorm.Open(postgres.Open(dsn),&gorm.Config{})
+	if err != nil {
+		fmt.Printf("Gagal koneksi DB : %v",err)
+	}
+	fmt.Println("Berhasil Koneksi kedalam Database")
 }
 
 
