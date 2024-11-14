@@ -2,6 +2,8 @@ package model
 
 import (
 	"time"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Customer struct {
@@ -12,4 +14,9 @@ type Customer struct {
 	Address     string    `gorm:"type:text"`
 	Status      string    `gorm:"type:varchar(10);not null;check:status IN ('active','inactive')"`
 	BirthDate   time.Time `gorm:"type:date;not null"`
+}
+
+func (c *Customer) BeforeCreate(tx *gorm.DB)(err error){
+	c.BaseModel.ID = uuid.NewString()
+	return
 }
