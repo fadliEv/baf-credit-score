@@ -2,45 +2,35 @@ package delivery
 
 import (
 	"baf-credit-score/config"
-	"baf-credit-score/model"
+	"baf-credit-score/delivery/controller"
 	"baf-credit-score/repository"
 	"baf-credit-score/usecase"
 	"fmt"
-	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 type server struct {
 	customerUsecase usecase.CustomerUsecase
+	engine *gin.Engine
+}
+
+func(s *server) setupController(){
+	rg := s.engine.Group("/api/v1")
+	controller.NewCustomerController(s.customerUsecase,rg).Route()
 }
 
 func(s *server) Run(){
-	// CRUD	
-	// Create Customer
-	// Siapkan Data Customer 
-	newCustomer := model.Customer{
-		FullName:    "Ronald",
-		PhoneNumber: "098370981184",
-		NIK:         "12378123125",
-		Address:     "Depok",
-		Status:      "active",
-		BirthDate:   time.Now(),
+	s.setupController()
+	if err := s.engine.Run(); err != nil {
+		panic(fmt.Errorf("server not running %s ",err.Error()))
 	}
-	
-	err := s.customerUsecase.RegisterCustomer(newCustomer)
-	if err != nil {
-		fmt.Printf("Error Rgister Customer : %v \n",err)
-	}
-
-	// Find All Customer
-
-	// Find Customer By Id
-
-	// Update Customer By Id
-
-	// Delete Customer By Id
 }
 
 func NewServer() *server{
+	// intance gin engine
+	ginEngine := gin.Default()
+
 	// Ambil Configurasi ENV File untuk kebutuhan Koneksi Database
 	cfg,errConfig := config.NewConfig()
 	if errConfig != nil {
@@ -51,15 +41,15 @@ func NewServer() *server{
 	db, errConn := config.NewDbConnection(cfg)
 	if errConn != nil {
 		fmt.Printf("Error Connection : %v \n",errConn)
-	}
-
-	fmt.Println("Koneksi aman!!")
+	}	
 
 	// init customer repository
 	repo := repository.NewCustomerRepository(db.Conn())
+	
 	// init customer usecase
 	usecase := usecase.NewCustomerUsecase(repo)
 	return &server{
 		customerUsecase: usecase,
+		engine: ginEngine, // assign ke dalam struct server
 	}
 }
