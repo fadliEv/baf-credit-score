@@ -4,62 +4,113 @@ import (
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
 type CustomerController struct {
-	uc usecase.CustomerUsecase
-	r *gin.RouterGroup
+    uc usecase.CustomerUsecase
+    r *gin.RouterGroup
 }
 
-// RegisterCustomer implements CustomerController.
-func (cc *CustomerController) createHandler(c *gin.Context){
-	var payload dto.CustomerRequestDto
-	err := c.ShouldBindJSON(&payload)	
-	if err != nil {
-		c.JSON(http.StatusBadRequest,gin.H{
-			"message" : "Error Register Customer : " + err.Error(),
-		})
-		return 
-	}
-	if err := cc.uc.RegisterCustomer(payload); err != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{
-			"message" : "Error Register Customer : " + err.Error(),
-		})
-		return 
-	}
-	c.JSON(http.StatusOK,gin.H{
-		"message" : "Success Register Customer : ",
-	})
+func (cc *CustomerController) createHandler(c *gin.Context) {
+    var payload dto.CustomerRequestDto
+    if err := c.ShouldBindJSON(&payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "Message": "Error Register Customer : " + err.Error(),
+        })
+        return
+    }
+
+    if err := cc.uc.RegisterCustomer(payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "Message": "Error Register Customer : " + err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "Message": "Success Register Customer",
+    })
 }
 
-func (cc *CustomerController) findByIdHandler(c *gin.Context){
-	// Path Param
-	// id := c.Param("id")
+func (cc *CustomerController) listHandler(c *gin.Context) {
+    customers, err := cc.uc.FindAll()
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "Message": "Error Get List Customer : " + err.Error(),
+        })
+        return
+    }
 
-	// Query Param
-	id := c.DefaultQuery("id","100")
-	customer, err := cc.uc.FindCustomerById(id)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{
-			"message" : "Error Get Customer : " + err.Error(),
-		})
-		return 
-	}
-	c.JSON(http.StatusOK,gin.H{
-		"data" : customer,
-		"message" : "Success get Customer by id",
-	})
+    c.JSON(http.StatusOK, gin.H{
+        "data":    customers,
+        "Message": "Success Get All Customer",
+    })
 }
 
-func (cc *CustomerController) Route(){
-	cc.r.POST("/customers",cc.createHandler)
-	cc.r.GET("/customers",cc.findByIdHandler)
+func (cc *CustomerController) updateByIdHandler(c *gin.Context) {    
+    var payload dto.CustomerRequestDto
+    if err := c.ShouldBindJSON(&payload); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "Message": "Error Update Customer : " + err.Error(),
+        })
+        return
+    }
+
+    if err := cc.uc.UpdateCustomer(payload); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "Message": "Error Update Customer : " + err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "Message": "Success Update Customer",
+    })
 }
 
-func NewCustomerController(usecase usecase.CustomerUsecase,rg *gin.RouterGroup) *CustomerController {
-	return &CustomerController{
-		uc: usecase,
-		r : rg,
-	}
+func (cc *CustomerController) findByIdHandler(c *gin.Context) {
+    id := c.Param("id")
+    customer, err := cc.uc.FindCustomerById(id)
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "Message": "Error Find Customer : " + err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "data":    customer,
+        "Message": "Success Find Customer",
+    })
+}
+
+func (cc *CustomerController) deleteHandler(c *gin.Context) {
+    id := c.Param("id")
+    if err := cc.uc.DeleteCustomer(id); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{
+            "Message": "Error Delete Customer : " + err.Error(),
+        })
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "Message": "Success Delete Customer",
+    })
+}
+
+func (cc *CustomerController) Route() {
+    cc.r.POST("/customers", cc.createHandler)
+    cc.r.GET("/customers", cc.listHandler)
+    cc.r.GET("/customers/:id", cc.findByIdHandler)
+    cc.r.PUT("/customers", cc.updateByIdHandler)
+    cc.r.DELETE("/customers/:id", cc.deleteHandler)
+}
+
+func NewCustomerController(usecase usecase.CustomerUsecase, r *gin.RouterGroup) *CustomerController {
+    return &CustomerController{
+        uc: usecase,
+        r:  r,
+    }
 }

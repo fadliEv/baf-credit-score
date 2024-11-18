@@ -2,6 +2,7 @@ package repository
 
 import (
 	"baf-credit-score/model"
+
 	"gorm.io/gorm"
 )
 
@@ -21,33 +22,45 @@ CONSTRUCTOR
 **/
 
 type CustomerRepository interface {
-	InsertCustomer(newCustomer model.Customer) error
-	FindCustomerById(id string) (model.Customer, error)
+	Save(payload model.Customer) error     //Insert data
+	Get(id string) (model.Customer, error) //Get data berdasarkan ID
+	Update(payload model.Customer) error   //Update data
+	List() ([]model.Customer, error)       //Get semua data
+	Delete(id string) error                //Hapus data berdasarkan ID
 }
 
 type customerRepository struct {
 	db *gorm.DB
 }
 
-// FindCustomerById implements CustomerRepository.
-func (c *customerRepository) FindCustomerById(id string) (model.Customer, error) {
+func (c *customerRepository) Get(id string) (model.Customer, error) {
 	var customer model.Customer
-	err := c.db.First(&customer,"id = ?",id).Error
+	err := c.db.Where("id", id).First(&customer).Error
 	if err != nil {
-		return model.Customer{},err
+		return model.Customer{}, err
 	}
-	return customer,nil
+	return customer, nil
 }
 
-// insertCustomer implements CustomerRepository.
-func (c *customerRepository) InsertCustomer(newCustomer model.Customer) error {
-	// insert data kedalam database
-	// sql.exec("inser into...",value,value)
-	errCreate := c.db.Create(&newCustomer)
-	if errCreate.Error != nil {
-		return errCreate.Error
+func (c *customerRepository) List() ([]model.Customer, error) {
+	var customers []model.Customer
+	err := c.db.Find(&customers).Error
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return customers, nil
+}
+
+func (c *customerRepository) Save(payload model.Customer) error {
+	return c.db.Create(&payload).Error
+}
+
+func (c *customerRepository) Update(payload model.Customer) error {
+	return c.db.Model(&model.Customer{}).Where("id = ?", payload.ID).Updates(payload).Error
+}
+
+func (c *customerRepository) Delete(id string) error {	
+	return c.db.Delete(&model.Customer{}, "id = ?", id).Error
 }
 
 func NewCustomerRepository(db *gorm.DB) CustomerRepository {
