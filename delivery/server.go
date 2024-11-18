@@ -3,8 +3,10 @@ package delivery
 import (
 	"baf-credit-score/config"
 	"baf-credit-score/delivery/controller"
+	"baf-credit-score/delivery/middleware"
 	"baf-credit-score/repository"
 	"baf-credit-score/usecase"
+	"baf-credit-score/utils/service"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +14,18 @@ import (
 
 type server struct {
 	customerUsecase usecase.CustomerUsecase
+	userUsecase usecase.UserUsecase
+	authUsecase usecase.AuthenticationUsecase
 	engine *gin.Engine
+	jwtSerivce service.JwtService
 }
 
 func(s *server) setupController(){
-	rg := s.engine.Group("/api/v1")
-	controller.NewCustomerController(s.customerUsecase,rg).Route()
+	authMiddleware := middleware.NewAuthMiddleware(s.jwtSerivce)
+	rg := s.engine.Group("/api/v1")	
+	controller.NewCustomerController(s.customerUsecase,rg,authMiddleware).Route()
+	controller.NewUserController(s.userUsecase,rg).Route()
+	controller.NewAuthController(s.authUsecase,rg).Route()
 }
 
 func(s *server) Run(){
@@ -43,13 +51,26 @@ func NewServer() *server{
 		fmt.Printf("Error Connection : %v \n",errConn)
 	}	
 
-	// init customer repository
-	repo := repository.NewCustomerRepository(db.Conn())
-	
-	// init customer usecase
-	usecase := usecase.NewCustomerUsecase(repo)
+	// -------------------------------------- Customer	
+	customerRepo := repository.NewCustomerRepository(db.Conn())	
+	customerUsecase := usecase.NewCustomerUsecase(customerRepo)
+
+
+	// -------------------------------------- User	
+	userRepo := repository.NewUserRepository(db.Conn())
+	userUsecase := usecase.NewUserUsecase(userRepo)	
+
+	// test jwt service
+	jwtService := service.NewJwtService(cfg.TokenConfig)
+
+	// -------------------------------------- Auth
+	authUsecase := usecase.NewAuthenticationUsecase(userUsecase,jwtService)	
+
 	return &server{
-		customerUsecase: usecase,
+		customerUsecase: customerUsecase,
+		userUsecase: userUsecase,
 		engine: ginEngine, // assign ke dalam struct server
+		jwtSerivce: jwtService,
+		authUsecase: authUsecase,
 	}
 }

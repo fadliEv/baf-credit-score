@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"baf-credit-score/delivery/middleware"
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 type CustomerController struct {
     uc usecase.CustomerUsecase
     r *gin.RouterGroup
+    authMiddlware middleware.AuthMiddleware
 }
 
 func (cc *CustomerController) createHandler(c *gin.Context) {
@@ -101,16 +103,21 @@ func (cc *CustomerController) deleteHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) Route() {
-    cc.r.POST("/customers", cc.createHandler)
-    cc.r.GET("/customers", cc.listHandler)
-    cc.r.GET("/customers/:id", cc.findByIdHandler)
-    cc.r.PUT("/customers", cc.updateByIdHandler)
-    cc.r.DELETE("/customers/:id", cc.deleteHandler)
+    cc.r.POST("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.createHandler)
+    cc.r.GET("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.listHandler)
+    cc.r.GET("/customers/:id",cc.authMiddlware.RequireToken("ADMIN"), cc.findByIdHandler)
+    cc.r.PUT("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.updateByIdHandler)
+    cc.r.DELETE("/customers/:id",cc.authMiddlware.RequireToken("ADMIN"), cc.deleteHandler)
 }
 
-func NewCustomerController(usecase usecase.CustomerUsecase, r *gin.RouterGroup) *CustomerController {
+func NewCustomerController(
+    usecase usecase.CustomerUsecase,
+    r *gin.RouterGroup,
+    authMiddleware middleware.AuthMiddleware,
+    ) *CustomerController {
     return &CustomerController{
         uc: usecase,
         r:  r,
+        authMiddlware: authMiddleware,
     }
 }
