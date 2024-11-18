@@ -5,6 +5,7 @@ import (
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/common"
+	"baf-credit-score/utils/constant"
 	"net/http"
 	"strconv"
 
@@ -98,11 +99,11 @@ func (cc *CustomerController) deleteHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) Route() {
-    cc.r.POST("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.createHandler)
-    cc.r.GET("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.listHandler)
-    cc.r.GET("/customers/:id",cc.authMiddlware.RequireToken("ADMIN"), cc.findByIdHandler)
-    cc.r.PUT("/customers",cc.authMiddlware.RequireToken("ADMIN"), cc.updateByIdHandler)
-    cc.r.DELETE("/customers/:id",cc.authMiddlware.RequireToken("ADMIN"), cc.deleteHandler)
+    cc.r.POST(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.createHandler)
+    cc.r.GET(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.listHandler)
+    cc.r.GET(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.findByIdHandler)
+    cc.r.PUT(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.updateByIdHandler)
+    cc.r.DELETE(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.deleteHandler)
 }
 
 func NewCustomerController(

@@ -6,6 +6,7 @@ import (
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/common"
+	"baf-credit-score/utils/constant"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,7 @@ func (us *AuthController) loginHandler(c *gin.Context){
 }
 
 func (us *AuthController) Route(){
-	us.r.POST("/auth/login",us.loginHandler)
+	us.r.POST(constant.AuthLogin,us.loginHandler)
 }
 
 func NewAuthController(
