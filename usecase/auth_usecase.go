@@ -7,7 +7,7 @@ import (
 
 type AuthenticationUsecase interface {
 	Login(email string, password string) (string, error)
-	Register(payload dto.UserRequestDto) error
+	Register(payload dto.UserRequestDto) (dto.UserResponseDto,error)
 }
 
 type authenticationUsecase struct {
@@ -29,7 +29,7 @@ func (a *authenticationUsecase) Login(email string, password string) (string, er
 }
 
 // Register implements AuthenticationUsecase.
-func (a *authenticationUsecase) Register(payload dto.UserRequestDto) error {
+func (a *authenticationUsecase) Register(payload dto.UserRequestDto) (dto.UserResponseDto,error) {
 	return a.userUc.RegisterUser(payload)
 }
 

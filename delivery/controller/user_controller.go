@@ -24,11 +24,12 @@ func (us *UserController) createHandler(c *gin.Context){
 		common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
 		return 
 	}
-	if err := us.uc.RegisterUser(payload); err != nil {
+	userResponse, err := us.uc.RegisterUser(payload);
+	if  err != nil {
 		common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
 		return 
 	}
-	common.SendSuccessResponse(c,payload,"Success Register User")
+	common.SendSuccessResponse(c,userResponse,"Success Register User")
 }
 
 func (us *UserController) Route(){

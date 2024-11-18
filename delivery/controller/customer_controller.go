@@ -24,13 +24,13 @@ func (cc *CustomerController) createHandler(c *gin.Context) {
         common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
         return
     }
-
-    if err := cc.uc.RegisterCustomer(payload); err != nil {
+    result, err := cc.uc.RegisterCustomer(payload);
+    if err != nil {
         common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    common.SendSuccessResponse(c,payload,"Success Register Customer")
+    common.SendSuccessResponse(c,result,"Success Register Customer")
 }
 
 func (cc *CustomerController) listHandler(c *gin.Context) {
@@ -99,7 +99,7 @@ func (cc *CustomerController) deleteHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) Route() {
-    cc.r.POST(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.createHandler)
+    cc.r.POST(constant.Customers, cc.createHandler)
     cc.r.GET(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.listHandler)
     cc.r.GET(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.findByIdHandler)
     cc.r.PUT(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.updateByIdHandler)

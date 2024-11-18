@@ -8,7 +8,7 @@ import (
 )
 
 type UserUsecase interface {
-	RegisterUser(payload dto.UserRequestDto) error
+	RegisterUser(payload dto.UserRequestDto) (dto.UserResponseDto,error)
 	FindUserById(id string) (model.User, error)
 	FindUserByEmail(email string) (model.User, error)
 	FindByEmailPassword(email string, password string) (model.User, error)
@@ -42,17 +42,26 @@ func (u *userUsecase) FindUserById(id string) (model.User, error) {
 }
 
 // RegisterUser implements UserUsecase.
-func (u *userUsecase) RegisterUser(payload dto.UserRequestDto) error {
+func (u *userUsecase) RegisterUser(payload dto.UserRequestDto) (dto.UserResponseDto,error) {
 	hashedPass, err := common.HashPassword(payload.Password)
 	if err != nil {
-		return err
+		return dto.UserResponseDto{},err
 	}
 	user := model.User{
 		Email:    payload.Email,
 		Password: hashedPass,
 		Role:     payload.Role,
 	}
-	return u.repo.Save(user)
+	userResponse := dto.UserResponseDto {
+		Email: payload.Email,
+		Role: payload.Role,
+	}
+	errSave := u.repo.Save(user)
+	if errSave != nil {
+		return dto.UserResponseDto{},err
+	}
+	return userResponse,nil
+
 }
 
 func NewUserUsecase(repo repository.UserRepository) UserUsecase {

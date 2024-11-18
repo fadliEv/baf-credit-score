@@ -45,7 +45,7 @@ func (c *customerRepository) Get(id string) (model.Customer, error) {
 
 func (c *customerRepository) List(limit int, offset int) ([]model.Customer, error) {
 	var customers []model.Customer
-    if err := c.db.Limit(limit).Offset(offset).Find(&customers).Error; err != nil {        
+    if err := c.db.Preload("User").Limit(limit).Offset(offset).Find(&customers).Error; err != nil {        
         return nil, err
     }
     return customers, nil

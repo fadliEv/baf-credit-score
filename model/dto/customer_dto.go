@@ -8,4 +8,17 @@ type CustomerRequestDto struct {
 	Address     string `json:"address" binding:"required"`
 	Status      string `json:"status" binding:"required"`
 	BirthDate   string `json:"birthDate" binding:"required,datetime=02-01-2006"`
+	Email       string `json:"email" binding:"required"`
+	Password    string `json:"password" binding:"required"`
+}
+
+type CustomerResponseDto struct {
+	BaseModelResponseDto
+	FullName    string          `json:"fullName"`
+	PhoneNumber string          `json:"phoneNumber"`
+	NIK         string          `json:"nik"`
+	Address     string          `json:"address"`
+	Status      string          `json:"status"`
+	BirthDate   string          `json:"birthDate"`
+	User        UserResponseDto `json:"user"`
 }
