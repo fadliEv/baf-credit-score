@@ -5,6 +5,7 @@ package controller
 import (
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
+	"baf-credit-score/utils/common"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -20,22 +21,15 @@ func (us *AuthController) loginHandler(c *gin.Context){
 	var payload dto.LoginDto
 	err := c.ShouldBindJSON(&payload)	
 	if err != nil {
-		c.JSON(http.StatusBadRequest,gin.H{
-			"message" : "Error Login : " + err.Error(),
-		})
+		common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
 		return 
 	}
 	token, err := us.uc.Login(payload.Email,payload.Password); 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,gin.H{
-			"message" : "Error Login : " + err.Error(),
-		})
+		common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
 		return 
-	}
-	c.JSON(http.StatusOK,gin.H{
-		"token" : token,
-		"message" : "Success Login User",
-	})
+	}	
+	common.SendSuccessResponse(c,token,"Success Login")
 }
 
 func (us *AuthController) Route(){

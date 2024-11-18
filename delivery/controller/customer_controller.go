@@ -4,6 +4,7 @@ import (
 	"baf-credit-score/delivery/middleware"
 	"baf-credit-score/model/dto"
 	"baf-credit-score/usecase"
+	"baf-credit-score/utils/common"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,88 +19,62 @@ type CustomerController struct {
 func (cc *CustomerController) createHandler(c *gin.Context) {
     var payload dto.CustomerRequestDto
     if err := c.ShouldBindJSON(&payload); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "Message": "Error Register Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
         return
     }
 
     if err := cc.uc.RegisterCustomer(payload); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "Message": "Error Register Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "Message": "Success Register Customer",
-    })
+    common.SendSuccessResponse(c,payload,"Success Register Customer")
 }
 
 func (cc *CustomerController) listHandler(c *gin.Context) {
     customers, err := cc.uc.FindAll()
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "Message": "Error Get List Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "data":    customers,
-        "Message": "Success Get All Customer",
-    })
+    common.SendSuccessResponse(c,customers,"Success Get All Customer")
 }
 
 func (cc *CustomerController) updateByIdHandler(c *gin.Context) {    
     var payload dto.CustomerRequestDto
     if err := c.ShouldBindJSON(&payload); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "Message": "Error Update Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
         return
     }
 
     if err := cc.uc.UpdateCustomer(payload); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "Message": "Error Update Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "Message": "Success Update Customer",
-    })
+    common.SendSuccessResponse(c,payload,"Success Update Customer")
 }
 
 func (cc *CustomerController) findByIdHandler(c *gin.Context) {
     id := c.Param("id")
     customer, err := cc.uc.FindCustomerById(id)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "Message": "Error Find Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "data":    customer,
-        "Message": "Success Find Customer",
-    })
+    common.SendSuccessResponse(c,customer,"Success Get Customer By Id")
 }
 
 func (cc *CustomerController) deleteHandler(c *gin.Context) {
     id := c.Param("id")
     if err := cc.uc.DeleteCustomer(id); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "Message": "Error Delete Customer : " + err.Error(),
-        })
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
 
-    c.JSON(http.StatusOK, gin.H{
-        "Message": "Success Delete Customer",
-    })
+    common.SendSuccessResponse(c,nil,"Success Delete Customer")
 }
 
 func (cc *CustomerController) Route() {
