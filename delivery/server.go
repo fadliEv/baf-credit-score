@@ -7,7 +7,10 @@ import (
 	"baf-credit-score/repository"
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/service"
+	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,6 +40,11 @@ func(s *server) Run(){
 
 func NewServer() *server{
 	// intance gin engine
+	f, err := os.Create("api.log")
+	if err != nil {
+		panic(errors.New("failed init log file"))
+	}
+	gin.DefaultWriter = io.MultiWriter(f,os.Stdout)
 	ginEngine := gin.Default()
 
 	// Ambil Configurasi ENV File untuk kebutuhan Koneksi Database
