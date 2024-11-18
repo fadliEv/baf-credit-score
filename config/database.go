@@ -1,7 +1,9 @@
 package config
 
 import (
+	"baf-credit-score/model"
 	"fmt"
+	"log"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,7 +32,23 @@ func (d *dbConnection) initDbConnection() error {
 		return errConnection
 	}
 	d.db = db
+
+	// Cek apakah AutoMigration diaktifkan berdasarkan konfigurasi
+    if d.cfg.Migration == "true" {
+        if err := d.db.AutoMigrate(d.getModels()...); err != nil {
+            log.Fatalf("Migration is Failed: %v", err)
+        }
+        log.Println("Migration is success!")
+    }    
+
 	return nil
+}
+
+func (d *dbConnection) getModels() []interface{} {
+    return []interface{}{
+        &model.Customer{},
+        &model.User{},    		
+    }
 }
 
 func (d *dbConnection) Conn() *gorm.DB{
