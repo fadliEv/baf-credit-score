@@ -6,6 +6,7 @@ import (
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/common"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,13 +33,32 @@ func (cc *CustomerController) createHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) listHandler(c *gin.Context) {
-    customers, err := cc.uc.FindAll()
+    sizeParam := c.DefaultQuery("size", "3")
+    pageParam := c.DefaultQuery("page", "1")
+
+    size, err := strconv.Atoi(sizeParam)
+    if err != nil || size <= 0 {        
+		common.SendErrorResponse(c,http.StatusBadRequest,"Invalid size parameter")
+        return
+    }
+    
+    page, err := strconv.Atoi(pageParam)
+    if err != nil || page <= 0 {
+        common.SendErrorResponse(c,http.StatusBadRequest,"Invalid page parameter")
+        return
+    }
+
+
+    customers, paging,err := cc.uc.FindAll(size,page)
     if err != nil {
         common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
         return
     }
-
-    common.SendSuccessResponse(c,customers,"Success Get All Customer")
+    var customerItems []any
+	for _, customer := range customers {
+		customerItems = append(customerItems, customer)
+	}
+    common.SendPageResponse(c,customerItems,paging,"Success Get All Customer")
 }
 
 func (cc *CustomerController) updateByIdHandler(c *gin.Context) {    

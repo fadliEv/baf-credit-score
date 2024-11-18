@@ -5,12 +5,13 @@ import (
 	"baf-credit-score/model/dto"
 	"baf-credit-score/repository"
 	"baf-credit-score/utils"
+	"baf-credit-score/utils/payload"
 )
 
 type CustomerUsecase interface {
 	RegisterCustomer(payload dto.CustomerRequestDto) error
 	FindCustomerById(id string) (model.Customer, error)
-	FindAll() ([]model.Customer, error)
+	FindAll(size int, page int) ([]model.Customer,payload.Paging,error) 
 	UpdateCustomer(payloada dto.CustomerRequestDto) error
 	DeleteCustomer(id string) error
 }
@@ -29,8 +30,24 @@ func (c *customerUsecase) DeleteCustomer(id string) error {
 }
 
 // FindAll implements CustomerUsecase.
-func (c *customerUsecase) FindAll() ([]model.Customer, error) {
-	return c.repo.List()
+func (c *customerUsecase) FindAll(size int, page int) ([]model.Customer,payload.Paging,error) {
+	totalRecords, err := c.repo.GetTotal()
+	if err != nil {
+		return nil, payload.Paging{},err
+	}
+	totalPages := (int(totalRecords) + size - 1) / size
+	offset := (page - 1) * size
+	paging := payload.Paging {
+		Page: page,
+		TotalRows: totalRecords,
+		RowsPerPage: size,
+		TotalPages: totalPages,
+	}
+	customers, err := c.repo.List(size,offset)
+	if err != nil {
+		return nil, payload.Paging{},err
+	}
+	return customers,paging,nil
 }
 
 // UpdateCustomer implements CustomerUsecase.

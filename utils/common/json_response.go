@@ -16,6 +16,17 @@ func SendSuccessResponse(c *gin.Context, data any, responseType string) {
 	})
 }
 
+func SendPageResponse(c *gin.Context, data []any, paging payload.Paging,responseType string) {
+	c.JSON(http.StatusOK, &payload.PagedResponse{
+		Status: payload.Status{
+			Code:        http.StatusOK,
+			Description: responseType,
+		},
+		Data:   data,
+		Paging: paging,
+	})
+}
+
 func SendErrorResponse(c *gin.Context, code int, errorMessage string) {
 	c.AbortWithStatusJSON(code, &payload.Status{
 		Code:        code,

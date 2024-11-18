@@ -13,4 +13,12 @@ type SingleResponse struct {
 type PagedResponse struct {
 	Status Status        `json:"status"`
 	Data   []interface{} `json:"data,omitempty"`
+	Paging Paging        `json:"paging,omitempty"`
+}
+
+type Paging struct {
+	Page        int   `json:"paging"`
+	RowsPerPage int   `json:"rowsPerPage"`
+	TotalRows   int64 `json:"totalRows"`
+	TotalPages  int   `json:"totalPages"`
 }
