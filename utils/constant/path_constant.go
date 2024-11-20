@@ -11,4 +11,5 @@ const (
 	// Auth Endpoint
 	Auth  = "/auth"
 	AuthLogin = "/auth/login"
+	AuthRegister = "/auth/register"
 )

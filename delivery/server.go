@@ -27,7 +27,7 @@ func(s *server) setupController(){
 	authMiddleware := middleware.NewAuthMiddleware(s.jwtSerivce)
 	rg := s.engine.Group("/api/v1")	
 	controller.NewCustomerController(s.customerUsecase,rg,authMiddleware).Route()
-	controller.NewUserController(s.userUsecase,rg).Route()
+	controller.NewUserController(s.userUsecase,rg,authMiddleware).Route()
 	controller.NewAuthController(s.authUsecase,rg).Route()
 }
 

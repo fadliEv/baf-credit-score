@@ -3,45 +3,62 @@
 package controller
 
 import (
-	"baf-credit-score/model/dto"
+	"baf-credit-score/delivery/middleware"
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/common"
+	"baf-credit-score/utils/constant"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-
 type UserController struct {
-	uc usecase.UserUsecase
-	r *gin.RouterGroup
+	uc            usecase.UserUsecase
+	r             *gin.RouterGroup
+	authMiddlware middleware.AuthMiddleware
 }
 
-func (us *UserController) createHandler(c *gin.Context){
-	var payload dto.UserRequestDto
-	err := c.ShouldBindJSON(&payload)	
+func (us *UserController) listHandler(c *gin.Context) {
+	sizeParam := c.DefaultQuery("size", "3")
+	pageParam := c.DefaultQuery("page", "1")
+
+	size, err := strconv.Atoi(sizeParam)
+	if err != nil || size <= 0 {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid size parameter")
+		return
+	}
+
+	page, err := strconv.Atoi(pageParam)
+	if err != nil || page <= 0 {
+		common.SendErrorResponse(c, http.StatusBadRequest, "Invalid page parameter")
+		return
+	}
+
+	users, paging, err := us.uc.FindAll(size, page)
 	if err != nil {
-		common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
-		return 
+		common.SendErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	userResponse, err := us.uc.RegisterUser(payload);
-	if  err != nil {
-		common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
-		return 
+	var customerItems []any
+	for _, customer := range users {
+		customerItems = append(customerItems, customer)
 	}
-	common.SendSuccessResponse(c,userResponse,"Success Register User")
+	common.SendPageResponse(c, customerItems, paging, "Success Get All Users")
 }
 
-func (us *UserController) Route(){
-	us.r.POST("/users",us.createHandler)
+func (us *UserController) Route() {
+	us.r.GET(constant.Users, us.authMiddlware.RequireToken(constant.ADMIN), us.listHandler)
 }
 
 func NewUserController(
 	usecase usecase.UserUsecase,
 	rg *gin.RouterGroup,
-	) *UserController {
+	authMiddleware middleware.AuthMiddleware,
+) *UserController {
 	return &UserController{
-		uc: usecase,
-		r : rg,	
+		uc:            usecase,
+		r:             rg,
+		authMiddlware: authMiddleware,
 	}
 }

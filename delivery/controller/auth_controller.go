@@ -7,6 +7,7 @@ import (
 	"baf-credit-score/usecase"
 	"baf-credit-score/utils/common"
 	"baf-credit-score/utils/constant"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,23 @@ type AuthController struct {
 	uc usecase.AuthenticationUsecase
 	r *gin.RouterGroup
 }
+
+func (us *AuthController) registerHandler(c *gin.Context){
+	var payload dto.UserRequestDto
+	err := c.ShouldBindJSON(&payload)	
+	if err != nil {
+		common.SendErrorResponse(c,http.StatusBadRequest,err.Error())
+		return 
+	}
+	userResponse, errUc := us.uc.Register(payload);
+	fmt.Println("DISINI !! : ",errUc)
+	if  errUc != nil {
+		common.SendErrorResponse(c,http.StatusInternalServerError,errUc.Error())
+		return 
+	}
+	common.SendSuccessResponse(c,userResponse,"Success Register User")
+}
+
 
 func (us *AuthController) loginHandler(c *gin.Context){
 	var payload dto.LoginDto
@@ -35,6 +53,7 @@ func (us *AuthController) loginHandler(c *gin.Context){
 
 func (us *AuthController) Route(){
 	us.r.POST(constant.AuthLogin,us.loginHandler)
+	us.r.POST(constant.AuthRegister,us.registerHandler)
 }
 
 func NewAuthController(

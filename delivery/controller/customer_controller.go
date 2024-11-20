@@ -99,7 +99,7 @@ func (cc *CustomerController) deleteHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) Route() {
-    cc.r.POST(constant.Customers, cc.createHandler)
+    cc.r.POST(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.createHandler)
     cc.r.GET(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.listHandler)
     cc.r.GET(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.findByIdHandler)
     cc.r.PUT(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.updateByIdHandler)
