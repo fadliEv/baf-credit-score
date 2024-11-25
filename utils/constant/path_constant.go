@@ -2,14 +2,17 @@ package constant
 
 const (
 	// Customer Endpoints
-	Customers   = "/customers"
-	CustomersID = "/customers/:id"
+	CUSTOMER_PATH   = "/customers"
+	CUSTOMER_ID_PATH = "/customers/:id"
 
 	// User Endpoint
-	Users = "/users"
+	USERS_PATH = "/users"
 
 	// Auth Endpoint
-	Auth  = "/auth"
-	AuthLogin = "/auth/login"
-	AuthRegister = "/auth/register"
+	AUTH_PATH  = "/auth"
+	AUTH_LOGIN_PATH = "/auth/login"
+	AUTH_REGISTER_PATH = "/auth/register"
+
+	// Credit Endpoint
+	CREDIT_PATH = "/credits"
 )

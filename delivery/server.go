@@ -19,6 +19,7 @@ type server struct {
 	customerUsecase usecase.CustomerUsecase
 	userUsecase usecase.UserUsecase
 	authUsecase usecase.AuthenticationUsecase
+	creditUsecase usecase.CreditUsecase
 	engine *gin.Engine
 	jwtSerivce service.JwtService
 }
@@ -29,6 +30,7 @@ func(s *server) setupController(){
 	controller.NewCustomerController(s.customerUsecase,rg,authMiddleware).Route()
 	controller.NewUserController(s.userUsecase,rg,authMiddleware).Route()
 	controller.NewAuthController(s.authUsecase,rg).Route()
+	controller.NewCreditController(s.creditUsecase,rg,authMiddleware).Route()
 }
 
 func(s *server) Run(){
@@ -74,11 +76,16 @@ func NewServer() *server{
 	// -------------------------------------- Auth
 	authUsecase := usecase.NewAuthenticationUsecase(userUsecase,jwtService)	
 
+	// -------------------------------------- Credit
+	creditRepo := repository.NewCreditRepository(db.Conn())
+	creditUsecase := usecase.NewCreditUsecase(creditRepo)
+
 	return &server{
 		customerUsecase: customerUsecase,
 		userUsecase: userUsecase,
 		engine: ginEngine, // assign ke dalam struct server
 		jwtSerivce: jwtService,
 		authUsecase: authUsecase,
+		creditUsecase: creditUsecase,
 	}
 }

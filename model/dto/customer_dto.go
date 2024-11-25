@@ -14,11 +14,12 @@ type CustomerRequestDto struct {
 
 type CustomerResponseDto struct {
 	BaseModelResponseDto
-	FullName    string          `json:"fullName"`
-	PhoneNumber string          `json:"phoneNumber"`
-	NIK         string          `json:"nik"`
-	Address     string          `json:"address"`
-	Status      string          `json:"status"`
-	BirthDate   string          `json:"birthDate"`
-	User        UserResponseDto `json:"user"`
+	FullName    string              `json:"fullName"`
+	PhoneNumber string              `json:"phoneNumber"`
+	NIK         string              `json:"nik"`
+	Address     string              `json:"address"`
+	Status      string              `json:"status"`
+	BirthDate   string              `json:"birthDate"`
+	User        *UserResponseDto     `json:"user,omitempty"`
+	Credits     []CreditResponseDto `json:"credits,omitempty"`
 }

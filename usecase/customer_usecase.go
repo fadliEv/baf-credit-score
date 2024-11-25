@@ -47,7 +47,7 @@ func (c *customerUsecase) FindAll(size int, page int) ([]dto.CustomerResponseDto
 	customers, err := c.repo.List(size,offset)
 	var customerResponses []dto.CustomerResponseDto
 	for _, customer := range customers {		
-		customerResponses =	append(customerResponses,c.mappingResponse(customer))
+		customerResponses =	append(customerResponses,c.mappingToResponse(customer))
 	}
 	if err != nil {
 		return nil, payload.Paging{},err
@@ -57,7 +57,7 @@ func (c *customerUsecase) FindAll(size int, page int) ([]dto.CustomerResponseDto
 
 // UpdateCustomer implements CustomerUsecase.
 func (c *customerUsecase) UpdateCustomer(payload dto.CustomerRequestDto) error {
-	customerModel, err := c.mappingRequest(payload)
+	customerModel, err := c.mappingToModel(payload)
 	if err != nil {
 		return err
 	}
@@ -71,12 +71,12 @@ func (c *customerUsecase) FindCustomerById(id string) (dto.CustomerResponseDto, 
 	if err != nil {
 		return dto.CustomerResponseDto{}, err
 	}
-	return c.mappingResponse(customer),nil
+	return c.mappingToResponse(customer),nil
 }
 
 // RegisterCustomer implements CustomerUsecase.
 func (c *customerUsecase) RegisterCustomer(payload dto.CustomerRequestDto) (dto.CustomerResponseDto,error){
-	customerModel, err := c.mappingRequest(payload)
+	customerModel, err := c.mappingToModel(payload)
 	if err != nil {
 		return dto.CustomerResponseDto{},err
 	}
@@ -87,7 +87,7 @@ func (c *customerUsecase) RegisterCustomer(payload dto.CustomerRequestDto) (dto.
 	user := model.User{
 		Email:    payload.Email,
 		Password: hashedPass,
-		Role:     constant.USER,
+		Role:     constant.USER_ROLE,
 	}
 	customerModel.User = user	
 	errSave := c.repo.Save(customerModel)
@@ -101,15 +101,15 @@ func (c *customerUsecase) RegisterCustomer(payload dto.CustomerRequestDto) (dto.
 		Address: payload.Address,
 		Status: payload.Status,
 		BirthDate: payload.BirthDate,
-		User: dto.UserResponseDto{
+		User: &dto.UserResponseDto{
 			Email: payload.Email,
-			Role: constant.USER,
+			Role: constant.USER_ROLE,
 		},
 	}
 	return customerResponse,nil
 }
 
-func (c *customerUsecase) mappingRequest(payload dto.CustomerRequestDto) (model.Customer,error){
+func (c *customerUsecase) mappingToModel(payload dto.CustomerRequestDto) (model.Customer,error){
 	parseBirthDate, err := common.ParseDate(payload.BirthDate)
 	if err != nil {
 		return model.Customer{}, err
@@ -124,7 +124,7 @@ func (c *customerUsecase) mappingRequest(payload dto.CustomerRequestDto) (model.
 	},nil
 }
 
-func (c *customerUsecase) mappingResponse(payload model.Customer) dto.CustomerResponseDto {
+func (c *customerUsecase) mappingToResponse(payload model.Customer) dto.CustomerResponseDto {
 	return dto.CustomerResponseDto{
 		BaseModelResponseDto: dto.BaseModelResponseDto{
 			Id: payload.ID,
@@ -137,7 +137,7 @@ func (c *customerUsecase) mappingResponse(payload model.Customer) dto.CustomerRe
 		Address: payload.Address,
 		Status: payload.Status,
 		BirthDate: common.FormatDateString(payload.BirthDate),
-		User: dto.UserResponseDto{
+		User: &dto.UserResponseDto{
 			BaseModelResponseDto: dto.BaseModelResponseDto{
 				Id: payload.User.ID,
 				CreatedAt: payload.User.CreatedAt,

@@ -48,6 +48,7 @@ func (d *dbConnection) getModels() []interface{} {
     return []interface{}{
         &model.Customer{},
         &model.User{},    		
+		&model.Credit{},
     }
 }
 

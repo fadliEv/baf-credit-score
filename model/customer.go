@@ -2,6 +2,7 @@ package model
 
 import (
 	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -15,10 +16,13 @@ type Customer struct {
 	Status      string    `gorm:"type:varchar(10);not null;check:status IN ('active','inactive')"`
 	BirthDate   time.Time `gorm:"type:date;not null"`
 	UserID      string    `gorm:"not null;unique"`
-    User        User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	User        User      `gorm:"foreignKey:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+
+	// Relasi ke model Credit
+	Credits []Credit `gorm:"foreignKey:CustomerID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
-func (c *Customer) BeforeCreate(tx *gorm.DB)(err error){
+func (c *Customer) BeforeCreate(tx *gorm.DB) (err error) {
 	c.BaseModel.ID = uuid.NewString()
 	return
 }

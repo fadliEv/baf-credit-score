@@ -48,7 +48,7 @@ func (us *UserController) listHandler(c *gin.Context) {
 }
 
 func (us *UserController) Route() {
-	us.r.GET(constant.Users, us.authMiddlware.RequireToken(constant.ADMIN), us.listHandler)
+	us.r.GET(constant.USERS_PATH, us.authMiddlware.RequireToken(constant.ADMIN_ROlE), us.listHandler)
 }
 
 func NewUserController(

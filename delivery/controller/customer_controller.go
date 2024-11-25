@@ -99,11 +99,11 @@ func (cc *CustomerController) deleteHandler(c *gin.Context) {
 }
 
 func (cc *CustomerController) Route() {
-    cc.r.POST(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.createHandler)
-    cc.r.GET(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.listHandler)
-    cc.r.GET(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.findByIdHandler)
-    cc.r.PUT(constant.Customers,cc.authMiddlware.RequireToken(constant.ADMIN), cc.updateByIdHandler)
-    cc.r.DELETE(constant.CustomersID,cc.authMiddlware.RequireToken(constant.ADMIN), cc.deleteHandler)
+    cc.r.POST(constant.CUSTOMER_PATH,cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.createHandler)
+    cc.r.GET(constant.CUSTOMER_PATH,cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.listHandler)
+    cc.r.GET(constant.CUSTOMER_ID_PATH,cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.findByIdHandler)
+    cc.r.PUT(constant.CUSTOMER_PATH,cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.updateByIdHandler)
+    cc.r.DELETE(constant.CUSTOMER_ID_PATH,cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.deleteHandler)
 }
 
 func NewCustomerController(
