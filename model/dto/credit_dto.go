@@ -16,14 +16,18 @@ type CreditRequestDto struct {
 
 type CreditResponseDto struct {
 	BaseModelResponseDto
-	AppNumber        string              `json:"appNumber"`
-	Customer         CustomerResponseDto `json:"customer,omitempty"`
-	ProductType      string              `json:"productType"`
-	LoanAmount       float64             `json:"loanAmount"`
-	Tenure           int                 `json:"tenure"`
-	EmploymentStatus string              `json:"employmentStatus"`
-	MonthlyIncome    float64             `json:"monthlyIncome"`
-	Status           string              `json:"status"`
-	RejectionReason  string              `json:"rejectionReason"`
-	SubmittedAt      string              `json:"submittedAt"`
+	AppNumber        string               `json:"appNumber"`
+	Customer         *CustomerResponseDto `json:"customer,omitempty"`
+	ProductType      string               `json:"productType"`
+	LoanAmount       float64              `json:"loanAmount"`
+	Tenure           int                  `json:"tenure"`
+	EmploymentStatus string               `json:"employmentStatus"`
+	MonthlyIncome    float64              `json:"monthlyIncome"`
+	Status           string               `json:"status"`
+	RejectionReason  string               `json:"rejectionReason"`	
+}
+
+type CustomerCreditResponseDto struct {
+	Customer CustomerResponseDto `json:"customer"`
+	Credits  []CreditResponseDto `json:"credits"`
 }

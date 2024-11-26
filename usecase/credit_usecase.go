@@ -11,7 +11,7 @@ import (
 type CreditUsecase interface {
 	CreateCredit(payload dto.CreditRequestDto) error
 	GetCreditByID(id string) (model.Credit, error)
-	GetCreditsByCustomer(customerID string) ([]model.Credit, error)
+	GetCreditsByCustomer(customerID string) (dto.CustomerCreditResponseDto, error)
 	FindAll(size int, page int) ([]dto.CreditResponseDto, payload.Paging, error)
 }
 
@@ -31,8 +31,20 @@ func (c *creditUsecase) GetCreditByID(id string) (model.Credit, error) {
 	return c.repo.Get(id)
 }
 
-func (c *creditUsecase) GetCreditsByCustomer(customerID string) ([]model.Credit, error) {
-	return c.repo.GetByCustomer(customerID)
+func (c *creditUsecase) GetCreditsByCustomer(customerID string) (dto.CustomerCreditResponseDto, error) {	
+	credits, err := c.repo.GetByCustomer(customerID)
+	if err != nil {
+		return dto.CustomerCreditResponseDto{},err
+	}
+	customerCredits := dto.CustomerCreditResponseDto{
+		Customer: c.mapCustomerToResponse(credits[0].Customer),
+	}
+	for _, credit := range credits {		
+		creditResponse := c.mappingToResponse(credit)
+		creditResponse.Customer = nil // tidak perlu ditampilkan didalam response
+		customerCredits.Credits = append(customerCredits.Credits, creditResponse)
+	}
+	return customerCredits,nil
 }
 
 func (c *creditUsecase) UpdateCredit(payload dto.CreditRequestDto) error {
@@ -66,7 +78,7 @@ func (c *creditUsecase) mappingToResponse(payload model.Credit) dto.CreditRespon
 			UpdatedAt: payload.BaseModel.UpdatedAt,
 		},
 		AppNumber: payload.AppNumber,
-		Customer: dto.CustomerResponseDto{
+		Customer: &dto.CustomerResponseDto{
 			BaseModelResponseDto: dto.BaseModelResponseDto{
 				Id:        payload.Customer.BaseModel.ID,
 				CreatedAt: payload.Customer.CreatedAt,
@@ -87,6 +99,22 @@ func (c *creditUsecase) mappingToResponse(payload model.Credit) dto.CreditRespon
 		MonthlyIncome:    payload.MonthlyIncome,
 		Status:           payload.Status,
 		RejectionReason:  payload.RejectionReason,
+	}
+}
+
+func (c *creditUsecase) mapCustomerToResponse(customer model.Customer) dto.CustomerResponseDto {
+	return dto.CustomerResponseDto{
+		BaseModelResponseDto: dto.BaseModelResponseDto{
+			Id: customer.BaseModel.ID,
+			CreatedAt: customer.BaseModel.CreatedAt,
+			UpdatedAt: customer.BaseModel.UpdatedAt,
+		},
+		FullName:    customer.FullName,
+		PhoneNumber: customer.PhoneNumber,
+		NIK:         customer.NIK,
+		Address:     customer.Address,
+		Status:      customer.Status,
+		BirthDate:   common.FormatDateString(customer.BirthDate),
 	}
 }
 

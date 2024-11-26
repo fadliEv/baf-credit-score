@@ -15,4 +15,5 @@ const (
 
 	// Credit Endpoint
 	CREDIT_PATH = "/credits"
+	CREDIT_ID_PATH = "/credits/:id"
 )

@@ -20,6 +20,6 @@ type CustomerResponseDto struct {
 	Address     string              `json:"address"`
 	Status      string              `json:"status"`
 	BirthDate   string              `json:"birthDate"`
-	User        *UserResponseDto     `json:"user,omitempty"`
+	User        *UserResponseDto    `json:"user,omitempty"`
 	Credits     []CreditResponseDto `json:"credits,omitempty"`
 }

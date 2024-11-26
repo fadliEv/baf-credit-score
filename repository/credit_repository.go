@@ -53,7 +53,7 @@ func (c *creditRepository) GetTotal() (int64, error) {
 
 func (c *creditRepository) GetByCustomer(id string) ([]model.Credit,error) {
 	var credits []model.Credit
-	err := c.db.Where("customer_id = ?", id).Find(&credits).Error
+	err := c.db.Preload("Customer").Where("customer_id = ?", id).Find(&credits).Error
 	if err != nil {
 		return nil,err
 	}

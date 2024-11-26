@@ -61,9 +61,21 @@ func (cc *CreditController) listHandler(c *gin.Context) {
     common.SendPageResponse(c,creditItems,paging,"Success Get All Credits")
 }
 
+func (cc *CreditController) findByCustomerHandler(c *gin.Context) {
+    id := c.Param("id")
+    credits, err := cc.uc.GetCreditsByCustomer(id)
+    if err != nil {
+        common.SendErrorResponse(c,http.StatusInternalServerError,err.Error())
+        return
+    }
+
+    common.SendSuccessResponse(c,credits,"Success Get Credits By Customer")
+}
+
 func (cc *CreditController) Route() {
 	cc.r.POST(constant.CREDIT_PATH, cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.createHandler)
 	cc.r.GET(constant.CREDIT_PATH, cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.listHandler)
+	cc.r.GET(constant.CREDIT_ID_PATH, cc.authMiddlware.RequireToken(constant.ADMIN_ROlE), cc.findByCustomerHandler)
 }
 
 func NewCreditController(
