@@ -20,6 +20,7 @@ type server struct {
 	userUsecase usecase.UserUsecase
 	authUsecase usecase.AuthenticationUsecase
 	creditUsecase usecase.CreditUsecase
+	creditScoreUsecase usecase.CreditScoreUsecase
 	engine *gin.Engine
 	jwtSerivce service.JwtService
 }
@@ -31,6 +32,7 @@ func(s *server) setupController(){
 	controller.NewUserController(s.userUsecase,rg,authMiddleware).Route()
 	controller.NewAuthController(s.authUsecase,rg).Route()
 	controller.NewCreditController(s.creditUsecase,rg,authMiddleware).Route()
+	controller.NewCreditScoreController(s.creditScoreUsecase,rg,authMiddleware).Route()
 }
 
 func(s *server) Run(){
@@ -76,9 +78,14 @@ func NewServer() *server{
 	// -------------------------------------- Auth
 	authUsecase := usecase.NewAuthenticationUsecase(userUsecase,jwtService)	
 
+	
+	// -------------------------------------- Credit Score
+	creditScoreRepo := repository.NewCreditScoreRepository(db.Conn())
+	creditScoreUsecase := usecase.NewCreditScoreUsecase(creditScoreRepo)
+	
 	// -------------------------------------- Credit
 	creditRepo := repository.NewCreditRepository(db.Conn())
-	creditUsecase := usecase.NewCreditUsecase(creditRepo)
+	creditUsecase := usecase.NewCreditUsecase(creditRepo,creditScoreUsecase)
 
 	return &server{
 		customerUsecase: customerUsecase,
@@ -87,5 +94,6 @@ func NewServer() *server{
 		jwtSerivce: jwtService,
 		authUsecase: authUsecase,
 		creditUsecase: creditUsecase,
+		creditScoreUsecase: creditScoreUsecase,
 	}
 }
