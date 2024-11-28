@@ -10,8 +10,7 @@ type CreditRequestDto struct {
 	EmploymentStatus string  `json:"employmentStatus"`
 	MonthlyIncome    float64 `json:"monthlyIncome"`
 	Status           string  `json:"status"`
-	RejectionReason  string  `json:"rejectionReason"`
-	SubmittedAt      string  `json:"submittedAt"`
+	RejectionReason  string  `json:"rejectionReason"`	
 }
 
 type CreditResponseDto struct {

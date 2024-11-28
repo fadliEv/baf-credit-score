@@ -6,6 +6,7 @@ import (
 	"baf-credit-score/repository"
 	"baf-credit-score/utils/common"
 	"baf-credit-score/utils/payload"
+	"fmt"
 )
 
 type CreditUsecase interface {
@@ -17,14 +18,27 @@ type CreditUsecase interface {
 
 type creditUsecase struct {
 	repo repository.CreditRepository
+	creditScoreUsecase CreditScoreUsecase
 }
 
 func (c *creditUsecase) CreateCredit(payload dto.CreditRequestDto) error {
 	creditModel, err := c.mappingToModel(payload)
 	if err != nil {
 		return err
+	}	
+	err = c.repo.Save(creditModel)
+	if err != nil {
+		return err
 	}
-	return c.repo.Save(creditModel)
+	credits, err := c.GetCreditsByCustomer(payload.CustomerID)
+	if err != nil {
+		return err
+	}
+	err = c.creditScoreUsecase.CreateOrUpdateScore(payload.CustomerID,credits.Credits)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (c *creditUsecase) GetCreditByID(id string) (model.Credit, error) {
@@ -36,15 +50,19 @@ func (c *creditUsecase) GetCreditsByCustomer(customerID string) (dto.CustomerCre
 	if err != nil {
 		return dto.CustomerCreditResponseDto{},err
 	}
-	customerCredits := dto.CustomerCreditResponseDto{
-		Customer: c.mapCustomerToResponse(credits[0].Customer),
+	var customerCredits dto.CustomerCreditResponseDto
+	if len(credits) > 0 {
+		customerCredits = dto.CustomerCreditResponseDto{
+			Customer: c.mapCustomerToResponse(credits[0].Customer),
+		}
+		for _, credit := range credits {		
+			creditResponse := c.mappingToResponse(credit)
+			creditResponse.Customer = nil // tidak perlu ditampilkan didalam response
+			customerCredits.Credits = append(customerCredits.Credits, creditResponse)
+		}
+		return customerCredits,nil
 	}
-	for _, credit := range credits {		
-		creditResponse := c.mappingToResponse(credit)
-		creditResponse.Customer = nil // tidak perlu ditampilkan didalam response
-		customerCredits.Credits = append(customerCredits.Credits, creditResponse)
-	}
-	return customerCredits,nil
+	return dto.CustomerCreditResponseDto{},fmt.Errorf("customer does not have credit data yet")
 }
 
 func (c *creditUsecase) UpdateCredit(payload dto.CreditRequestDto) error {
@@ -142,6 +160,12 @@ func (c *creditUsecase) FindAll(size int, page int) ([]dto.CreditResponseDto, pa
 	return creditResponses, paging, nil
 }
 
-func NewCreditUsecase(repo repository.CreditRepository) CreditUsecase {
-	return &creditUsecase{repo: repo}
+func NewCreditUsecase(
+	repo repository.CreditRepository,
+	creditScoreUsecase CreditScoreUsecase,
+	) CreditUsecase {
+	return &creditUsecase{
+		repo: repo,
+		creditScoreUsecase: creditScoreUsecase,
+	}
 }
