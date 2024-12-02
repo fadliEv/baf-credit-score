@@ -3,10 +3,11 @@ package usecase
 import (
 	"baf-credit-score/model"
 	"baf-credit-score/model/dto"
-	"baf-credit-score/repository"	
+	"baf-credit-score/repository"
 	"baf-credit-score/utils/common"
 	"baf-credit-score/utils/constant"
 	"baf-credit-score/utils/payload"
+	"log"
 )
 
 type CustomerUsecase interface {
@@ -150,6 +151,7 @@ func (c *customerUsecase) mappingToResponse(payload model.Customer) dto.Customer
 }
 
 func NewCustomerUsecase(repo repository.CustomerRepository) CustomerUsecase {
+	log.Printf("Cetak Reponya Dulu : %v ",repo)
 	return &customerUsecase{
 		repo: repo,
 	}
