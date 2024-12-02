@@ -20,6 +20,11 @@ type DbConfig struct {
 	Migration string
 }
 
+type ApiConfig struct {
+	ApiPort string
+	ApiHost string
+}
+
 type TokenConfig struct {
 	ApplicationName     string
 	JwtSignatureKey     []byte
@@ -29,6 +34,7 @@ type TokenConfig struct {
 
 type Config struct {
 	DbConfig
+	ApiConfig
 	TokenConfig
 }
 
@@ -38,6 +44,7 @@ func (c *Config) ReadConfigFile() error {
 		fmt.Printf("Error load Env File : %v", err.Error())
 		return err
 	}
+	// ------------------------------------------- Set DB Config
 	c.DbConfig = DbConfig{
 		Host:      os.Getenv("DB_HOST"),
 		Port:      os.Getenv("DB_PORT"),
@@ -48,6 +55,7 @@ func (c *Config) ReadConfigFile() error {
 		Migration: os.Getenv("MIGRATION"),
 	}
 
+	// ------------------------------------------- Set Token Config
 	// App Name
 	// Expired Time
 	appTokenExp, err := strconv.Atoi(os.Getenv("APP_TOKEN_EXPIRED"))
@@ -60,6 +68,12 @@ func (c *Config) ReadConfigFile() error {
 		JwtSignatureKey:     []byte(os.Getenv("APP_TOKEN_KEY")),
 		JwtSigningMethod:    jwt.SigningMethodHS256,
 		AccessTokenLifeTime: accessTokenLifeTime,
+	}
+
+	// ------------------------------------------- Set Api Config
+	c.ApiConfig = ApiConfig{
+		ApiPort:      os.Getenv("API_PORT"),
+		ApiHost:      os.Getenv("API_HOST"),
 	}
 	return nil
 }
